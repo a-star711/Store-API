@@ -10,7 +10,7 @@ const getAllProductsStatic = async (req,res) => {
 
   const getAllProducts = async (req,res) => {
 
-  const {featured, company, name, sort, fields} = req.query   
+  const {featured, company, name, sort, fields, numericFilters} = req.query   
   const queryObject = {}
 
   if(featured){
@@ -22,6 +22,23 @@ const getAllProductsStatic = async (req,res) => {
   if(name) {
     queryObject.name = { $regex: name, $options: 'i' }
   } 
+  if(numericFilters) {
+    const operatorMap = {
+      '>' :  '$gt',
+      '>=' : '$gte',
+      '=' :  '$eq',
+      '<' :  '$lt',
+      '<=' :  '$lte',
+  
+    }
+    // regex to match numericFilters
+    // replace user-friendly signs to mongoose readable values
+    const regEx = /\b(<|>|>=|=|<|<=)\b/g
+    let filters = numericFilters.replace(regEx, (match) =>`-${operatorMap[match]}-` )
+    console.log(filters)
+  } 
+
+  console.log(queryObject)
    // sorting
   let result = Product.find(queryObject)
   if(sort){
